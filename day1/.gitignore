@@ -1,0 +1,4 @@
+.stack-work/
+day1.cabal
+*~
+**/*.swp
