@@ -1,5 +1,6 @@
 module Lib
     ( day2
+    , day2_1
     , runProgram
     , Program(..)
     ) where
@@ -57,16 +58,37 @@ getProgram = liftM (Running . (map read) . (splitOn ",")) . readFile $ "input.tx
 runProgram :: Program -> IO Program
 runProgram program = return $ execState (interpret_ 0) program
 
-patch :: Program -> Program
-patch (Running (fst : pos1 : pos2 : rest)) = Running $ fst : 12 : 2 : rest
-patch (_) = Error 0
+patch :: Int -> Int -> Program -> Program
+patch ptr val (Running prog) = Running $ take ptr prog ++ [val] ++ (tail . drop ptr) prog 
+patch ptr val prog = prog
 
 day2 :: IO ()
 day2 = do
     borked <- getProgram
-    fixed <- return $ patch borked
+    fixed <- return $ (patch 1 12 . patch 2 2) borked
     putStrLn . show $ fixed
     final <- runProgram fixed
     case final of
         Halted prog -> putStrLn . show $ prog !! 0
         _ -> putStrLn ("Error executing program: " ++ show final)
+
+patch_ :: Int -> Int -> (Program -> Program)
+patch_ noun verb = (patch 1 noun . patch 2 verb)
+
+check_ :: Program -> (Int, Int) -> IO ()
+check_ program (noun, verb) = do
+    let solution noun verb = 100 * noun + verb
+    patched <- return (patch_ noun verb $ program)
+    final <- runProgram patched
+    case final of
+        Halted prog ->
+            if prog !! 0 == 19690720
+                then do 
+                    putStrLn (show noun ++ " " ++ show verb)
+                    putStrLn ("-> " ++ (show $ solution noun verb))
+                else return ()
+        _ -> return ()
+
+day2_1 = do
+    borked <- getProgram
+    mapM_ (check_ borked) [(verb, noun) | verb <- [0..99], noun <- [0..99]]
