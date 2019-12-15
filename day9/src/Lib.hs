@@ -1,5 +1,6 @@
 module Lib
     ( day9
+    , day9_1
     , runProgram
     , Program(..)
     , Param(..)
@@ -279,3 +280,8 @@ day9 :: IO ()
 day9 = do
     mem <- loadProgram
     validateResult $ runProgram $ initProgram mem 1
+
+day9_1 :: IO ()
+day9_1 = do
+    mem <- loadProgram
+    validateResult $ runProgram $ initProgram mem 2
